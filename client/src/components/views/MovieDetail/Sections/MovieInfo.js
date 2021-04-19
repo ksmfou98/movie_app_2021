@@ -1,5 +1,5 @@
 import React from "react";
-import { Descriptions, Badge } from "antd";
+import { Descriptions, Badge} from "antd";
 
 const MovieInfo = (props) => {
   let { movie } = props;
