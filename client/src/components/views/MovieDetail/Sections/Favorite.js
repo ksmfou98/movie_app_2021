@@ -1,5 +1,6 @@
 import Axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Button } from "antd"
 
 const Favorite = (props) => {
   const movieId = props.movieId;
@@ -8,24 +9,66 @@ const Favorite = (props) => {
   const moviePost = props.movieInfo.backdrop_path;
   const movieRunTime = props.movieInfo.runtime;
 
+  const [FavoriteNumber, setFavoriteNumber] = useState(0);
+  const [Favorited, setFavorited] = useState(false);
+
+  let variables = {
+    userFrom,
+    movieId,
+    movieTitle,
+    moviePost,
+    movieRunTime,
+  };
+
   useEffect(() => {
-    let variables = {
-      userFrom,
-      movieId,
-    };
-
     Axios.post("/api/favorite/favoriteNumber", variables).then((response) => {
-        console.log(response.data)
       if (response.data.success) {
-
+        setFavoriteNumber(response.data.favoriteNumber);
+        console.log(response.data.favoriteNumber);
       } else {
         alert("숫자 정보를 가져오는데 실패 했습니다. ");
       }
     });
+
+    Axios.post("/api/favorite/favorited", variables).then((response) => {
+      if (response.data.success) {
+        setFavorited(response.data.favorited);
+        console.log(response.data.favorited);
+      } else {
+        alert("정보를 가져오는데 실패 했습니다. ");
+      }
+    });
   }, []);
+
+  const onClickFavorite = () => {
+    if (Favorited) {
+      Axios.post("/api/favorite/removeFromFavorite", variables).then(
+        (response) => {
+          if (response.data.success) {
+            setFavoriteNumber(FavoriteNumber - 1);
+            setFavorited(!Favorited);
+          } else {
+            alert("Favorite 리스트에서 지우는걸 실패 했습니다.");
+          }
+        }
+      );
+    } else {
+      Axios.post("/api/favorite/addToFavorite", variables).then((response) => {
+        if (response.data.success) {
+          setFavoriteNumber(FavoriteNumber + 1);
+          setFavorited(!Favorited);
+        } else {
+          alert("Favorite 리스트에서 추가하는 걸 실패 했습니다.");
+        }
+      });
+    }
+  };
+
   return (
     <div>
-      <button>Favorite</button>
+      <Button onClick={onClickFavorite}>
+        {Favorited ? "Not Favorite" : "Add to Favortie"} {FavoriteNumber}{" "}
+      </Button>
     </div>
   );
 };
